@@ -166,7 +166,7 @@ const offset = 6;
 
 function Home() {
   const history = useNavigate();
-  const bigMovieMatch = useMatch("/movies/:movieId");
+  const bigMovieMatch = useMatch("movies/:movieId");
   const { scrollY } = useViewportScroll();
   const { data, isLoading } = useQuery<IGetMoviesResult>(
     ["movies", "nowPlaying"],
@@ -187,7 +187,7 @@ function Home() {
 
   const toggleLeaving = () => setLeaving((prev) => !prev);
   const onBoxClicked = (movieId: number) => {
-    history(`/movies/${movieId}`);
+    history(`/${movieId}`);
   };
   const onOverlayClick = () => history("/");
 
@@ -197,7 +197,7 @@ function Home() {
       (movie) => String(movie.id) === bigMovieMatch.params.movieId
     );
 
-  console.log(clickedMovie);
+  // console.log(clickedMovie);
 
   return (
     <Wrapper>

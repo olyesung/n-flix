@@ -22,7 +22,7 @@ const Col = styled.div`
 `;
 
 const Logo = styled(motion.svg)`
-  margin-right: 50px;
+  margin-right: 3vw;
   width: 95px;
   height: 25px;
   fill: ${(props) => props.theme.red};
@@ -64,7 +64,7 @@ const Circle = styled(motion.span)`
   position: absolute;
   width: 5px;
   height: 5px;
-  border-radius: 5px;
+  border-radius: 2.5px;
   bottom: -5px;
   left: 0;
   right: 0;
@@ -77,12 +77,18 @@ const Input = styled(motion.input)`
   position: absolute;
   right: 0;
   padding: 5px 10px;
-  padding-right: 40px;
+  padding-left: 40px;
   z-index: -1;
   color: white;
   font-size: 16px;
-  background-color: transparent;
+  background-color: black;
+  opacity: 0.8;
+  height: 35px;
+  width: 270px;
   border: 1px solid ${(props) => props.theme.white.lighter};
+  &:focus {
+    outline: none;
+  }
 `;
 
 const logoVariants = {
@@ -114,6 +120,8 @@ function Header() {
   const [searchOpen, setSearchOpen] = useState(false);
   const homeMatch = useMatch("/");
   const tvMatch = useMatch("/tv");
+  const movieMatch = useMatch("/movies");
+  const latestMatch = useMatch("/latest");
   const inputAnimation = useAnimation();
   const navAnimation = useAnimation();
   const { scrollY } = useViewportScroll();
@@ -166,13 +174,23 @@ function Header() {
               Tv Shows {tvMatch && <Circle layoutId="circle" />}
             </Link>
           </Item>
+          <Item>
+            <Link to="/movies">
+              Movies {movieMatch && <Circle layoutId="circle" />}
+            </Link>
+          </Item>
+          <Item>
+            <Link to="/latest">
+              New & Popular {latestMatch && <Circle layoutId="circle" />}
+            </Link>
+          </Item>
         </Items>
       </Col>
       <Col>
         <Search onSubmit={handleSubmit(onValid)}>
           <motion.svg
             onClick={toggleSearch}
-            animate={{ x: searchOpen ? 0 : 0 }}
+            animate={{ x: searchOpen ? -240 : 0 }}
             transition={{ type: "linear" }}
             fill="currentColor"
             viewBox="0 0 20 20"

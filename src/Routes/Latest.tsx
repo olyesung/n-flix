@@ -1,14 +1,21 @@
 import { useQuery } from "react-query";
-import { getTv_popular, IGetTVResult } from "../api";
 import styled from "styled-components";
 import { motion, AnimatePresence, useViewportScroll } from "framer-motion";
+import {
+  getMovies,
+  getTv_airing_today,
+  IGetMoviesResult,
+  IGetTVResult,
+} from "../api";
 import { makeImagePath } from "../utils";
 import { useState } from "react";
-import { Outlet, useMatch, useNavigate } from "react-router-dom";
+import { useNavigate, useMatch, Navigate, Outlet } from "react-router-dom";
+import Slider from "../Components/Slider";
 
 const Wrapper = styled.div`
-  background: black;
+  background-color: black;
   padding-bottom: 200px;
+  width: 100%;
 `;
 
 const Loader = styled.div`
@@ -39,7 +46,7 @@ const Overview = styled.p`
   width: 50%;
 `;
 
-const Slider = styled.div`
+const Slider_box = styled.div`
   position: relative;
   top: -100px;
 `;
@@ -164,14 +171,15 @@ const infoVariants = {
 
 const offset = 6;
 
-function Tv() {
+function Latest() {
   const history = useNavigate();
-  const bigTvMatch = useMatch("/tv/:tvId");
+  const bigTvMatch = useMatch("/latest/:tvId");
   const { scrollY } = useViewportScroll();
   const { data, isLoading } = useQuery<IGetTVResult>(
-    ["tv", "popular"],
-    getTv_popular
+    ["movies", "nowPlaying"],
+    getTv_airing_today
   );
+  //   console.log(data, isLoading);
   const [index, setIndex] = useState(0);
   const [leaving, setLeaving] = useState(false);
 
@@ -179,70 +187,40 @@ function Tv() {
     if (data) {
       if (leaving) return;
       toggleLeaving();
-      const totaltv = data.results.length - 1;
-      const maxIndex = Math.floor(totaltv / offset) - 1;
+      const totalMovies = data.results.length - 1;
+      const maxIndex = Math.floor(totalMovies / offset) - 1;
       setIndex((prev) => (prev === maxIndex ? 0 : prev + 1));
     }
   };
 
   const toggleLeaving = () => setLeaving((prev) => !prev);
   const onBoxClicked = (tvId: number) => {
-    history(`/tv/${tvId}`);
+    history(`/latest/${tvId}`);
   };
-
-  const onOverlayClick = () => history("/tv");
+  const onOverlayClick = () => history("/latest");
 
   const clickedTv =
     bigTvMatch?.params.tvId &&
     data?.results.find((tv) => String(tv.id) === bigTvMatch.params.tvId);
 
-  // console.log(clickedTv);
   return (
     <Wrapper>
       {isLoading ? (
         <Loader>Loading...</Loader>
       ) : (
         <>
-          <Banner
+          {/* <Banner
             onClick={incraseIndex}
-            bgPhoto={makeImagePath(data?.results[0].backdrop_path || "")}
+            bgPhoto={makeImagePath(
+              data?.results[0].backdrop_path ||
+                `${data?.results[0].poster_path}`
+            )}
           >
             <Title>{data?.results[0].name}</Title>
             <Overview>{data?.results[0].overview}</Overview>
-          </Banner>
-          <Slider>
-            <div style={{ fontSize: 30, fontWeight: 600 }}>Now playing</div>
-            <AnimatePresence initial={false} onExitComplete={toggleLeaving}>
-              <Row
-                variants={rowVariants}
-                initial="hidden"
-                animate="visible"
-                exit="exit"
-                transition={{ type: "tween", duration: 1 }}
-                key={index}
-              >
-                {data?.results
-                  .slice(1)
-                  .slice(offset * index, offset * index + offset)
-                  .map((tv) => (
-                    <Box
-                      layoutId={tv.id + ""}
-                      key={tv.id}
-                      whileHover="hover"
-                      initial="normal"
-                      transition={{ type: "tween" }}
-                      variants={boxVariants}
-                      onClick={() => onBoxClicked(tv.id)}
-                      bgphoto={makeImagePath(tv.backdrop_path, "w500")}
-                    >
-                      <Info variants={infoVariants}>
-                        <h4>{tv.name}</h4>
-                      </Info>
-                    </Box>
-                  ))}
-              </Row>
-            </AnimatePresence>
-          </Slider>
+          </Banner> */}
+
+          <Slider data={data} />
           <AnimatePresence>
             {bigTvMatch ? (
               <>
@@ -279,4 +257,5 @@ function Tv() {
     </Wrapper>
   );
 }
-export default Tv;
+
+export default Latest;
