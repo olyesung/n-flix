@@ -1,78 +1,13 @@
-import { useQuery } from "react-query";
 import styled from "styled-components";
 import { motion, AnimatePresence, useViewportScroll } from "framer-motion";
-import {
-  getMovies,
-  getTv_airing_today,
-  IGetMoviesResult,
-  IGetTVResult,
-} from "../api";
 import { makeImagePath } from "../utils";
 import { useState } from "react";
-import { useNavigate, useMatch, Navigate, Outlet } from "react-router-dom";
+import { useMatch, useNavigate } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faChevronRight } from "@fortawesome/free-solid-svg-icons";
 
-const Banner = styled.div<{ bgPhoto: string }>`
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 60px;
-  background-image: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 1)),
-    url(${(props) => props.bgPhoto});
-  background-size: cover;
-`;
-
-const Overview = styled.p`
-  font-size: 30px;
-  width: 50%;
-`;
-
-const Overlay = styled(motion.div)`
-  position: fixed;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  opacity: 0;
-`;
-
-const BigMovie = styled(motion.div)`
-  position: absolute;
-  width: 40vw;
-  height: 80vh;
-  left: 0;
-  right: 0;
-  margin: 0 auto;
-  border-radius: 15px;
-  overflow: hidden;
-  background-color: ${(props) => props.theme.black.lighter};
-`;
-
-const BigCover = styled.div`
-  width: 100%;
-  background-size: cover;
-  background-position: center center;
-  height: 400px;
-`;
-
-const BigRow_header_title = styled.h3`
-  color: ${(props) => props.theme.white.lighter};
-  padding: 20px;
-  font-size: 46px;
-  position: relative;
-  top: -80px;
-`;
-
-const BigOverview = styled.p`
-  padding: 20px;
-  position: relative;
-  top: -80px;
-  color: ${(props) => props.theme.white.lighter};
-`;
-
-//////////////////////////////
 const Wrapper = styled.div`
-  background-color: black;
+  margin: 5vh 3vw 0 3vw;
   padding-bottom: 200px;
 `;
 
@@ -83,9 +18,7 @@ const Loader = styled.div`
   align-items: center;
 `;
 
-const Slider_box = styled.div`
-  margin: 12vh 3vw;
-`;
+const Slider_box = styled.div``;
 
 const Row_header_title = styled.div`
   font-size: 1.4vw;
@@ -98,7 +31,7 @@ const Row = styled(motion.div)`
   grid-template-columns: repeat(6, 1fr);
   grid-template-rows: minmax(125px, 17vh);
   position: absolute;
-  width: 94vw;
+  width: 93vw;
   margin-top: 20px;
 `;
 
@@ -117,15 +50,9 @@ const Box = styled(motion.div)<{ bgphoto: string }>`
   &:last-child {
     transform-origin: center right;
   }
-`;
-
-const Title = styled.div`
-  font-size: 1.3vw;
-  font-weight: 600;
-  position: absolute;
-  bottom: 0;
-  text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000,
-    1px 1px 0 #000;
+  &:hover {
+    z-index: 1;
+  }
 `;
 
 const Info = styled(motion.div)`
@@ -139,6 +66,18 @@ const Info = styled(motion.div)`
     text-align: center;
     font-size: 18px;
   }
+`;
+
+const HandleNext = styled(motion.span)`
+  position: absolute;
+  bottom: 0;
+  right: -3vw;
+  height: 100%;
+  width: 2.65vw;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  opacity: 0.1;
 `;
 
 const rowVariants = {
@@ -158,9 +97,7 @@ const boxVariants = {
     scale: 1,
   },
   hover: {
-    scale: 1.3,
-    y: -80,
-    zIndex: 1,
+    scale: 1.4,
     transition: {
       delay: 0.3,
       duaration: 0.1,
@@ -180,9 +117,15 @@ const infoVariants = {
   },
 };
 
+const NextVariants = {
+  hover: {
+    opacity: 1,
+  },
+};
+
 const offset = 6;
 
-export default function Slider({ data }: any) {
+export default function Slider({ data, value }: any) {
   const history = useNavigate();
   const [index, setIndex] = useState(0);
   const [leaving, setLeaving] = useState(false);
@@ -194,13 +137,14 @@ export default function Slider({ data }: any) {
       const totalMovies = data.results.length - 1;
       const maxIndex = Math.floor(totalMovies / offset) - 1;
       setIndex((prev) => (prev === maxIndex ? 0 : prev + 1));
+      console.log(totalMovies, maxIndex);
     }
   };
 
   const toggleLeaving = () => setLeaving((prev) => !prev);
 
-  const onBoxClicked = (tvId: number) => {
-    history(`/latest/${tvId}`);
+  const onBoxClicked = (channelId: number) => {
+    history(`/latest/${channelId}`);
   };
 
   return (
@@ -210,7 +154,7 @@ export default function Slider({ data }: any) {
       ) : (
         <>
           <Slider_box>
-            <Row_header_title>New Episode</Row_header_title>
+            <Row_header_title>{value}</Row_header_title>
             <AnimatePresence initial={false} onExitComplete={toggleLeaving}>
               <Row
                 variants={rowVariants}
@@ -224,7 +168,7 @@ export default function Slider({ data }: any) {
                   .slice(offset * index, offset * index + offset)
                   .map((channel: any) => (
                     <Box
-                      layoutId={channel.id + ""}
+                      layoutId={channel.id + Date.now()}
                       key={channel.id}
                       whileHover="hover"
                       initial="normal"
@@ -235,12 +179,22 @@ export default function Slider({ data }: any) {
                         channel.backdrop_path || `${channel.poster_path}`
                       )}
                     >
-                      {/* <Title>{channel.name}</Title> */}
                       <Info variants={infoVariants}>
-                        <h4>{channel.name}</h4>
+                        <h4>{channel.name || channel.title}</h4>
                       </Info>
                     </Box>
                   ))}
+                <HandleNext
+                  onClick={incraseIndex}
+                  whileHover="hover"
+                  variants={NextVariants}
+                >
+                  <FontAwesomeIcon
+                    icon={faChevronRight}
+                    fontSize={35}
+                    style={{ margin: "10px" }}
+                  />
+                </HandleNext>
               </Row>
             </AnimatePresence>
           </Slider_box>

@@ -6,6 +6,7 @@ import Movie from "./Routes/Movie";
 import Search from "./Routes/Search";
 import Tv from "./Routes/Tv";
 import Latest from "./Routes/Latest";
+import Footer from "./Components/Footer";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route path="/latest/*" element={<Latest />}></Route>
         <Route path="/search" element={<Search />}></Route>
       </Routes>
+      <Footer />
     </Router>
   );
 }

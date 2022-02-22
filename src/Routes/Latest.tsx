@@ -3,7 +3,10 @@ import styled from "styled-components";
 import { motion, AnimatePresence, useViewportScroll } from "framer-motion";
 import {
   getMovies,
+  getMovie_popualr,
+  getMovie_upcoming,
   getTv_airing_today,
+  getTv_popular,
   IGetMoviesResult,
   IGetTVResult,
 } from "../api";
@@ -14,8 +17,6 @@ import Slider from "../Components/Slider";
 
 const Wrapper = styled.div`
   background-color: black;
-  padding-bottom: 200px;
-  width: 100%;
 `;
 
 const Loader = styled.div`
@@ -25,69 +26,6 @@ const Loader = styled.div`
   align-items: center;
 `;
 
-const Banner = styled.div<{ bgPhoto: string }>`
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 60px;
-  background-image: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 1)),
-    url(${(props) => props.bgPhoto});
-  background-size: cover;
-`;
-
-const Title = styled.h2`
-  font-size: 68px;
-  margin-bottom: 20px; ;
-`;
-
-const Overview = styled.p`
-  font-size: 30px;
-  width: 50%;
-`;
-
-const Slider_box = styled.div`
-  position: relative;
-  top: -100px;
-`;
-
-const Row = styled(motion.div)`
-  display: grid;
-  gap: 5px;
-  grid-template-columns: repeat(6, 1fr);
-  position: absolute;
-  width: 100%;
-`;
-
-const Box = styled(motion.div)<{ bgphoto: string }>`
-  background-color: white;
-  background-image: url(${(props) => props.bgphoto});
-  background-size: cover;
-  background-position: center center;
-  height: 200px;
-  font-size: 66px;
-  cursor: pointer;
-  &:first-child {
-    transform-origin: center left;
-  }
-  &:last-child {
-    transform-origin: center right;
-  }
-`;
-
-const Info = styled(motion.div)`
-  padding: 10px;
-  background-color: ${(props) => props.theme.black.lighter};
-  opacity: 0;
-  position: absolute;
-  width: 100%;
-  bottom: 0;
-  h4 {
-    text-align: center;
-    font-size: 18px;
-  }
-`;
-
 const Overlay = styled(motion.div)`
   position: fixed;
   top: 0;
@@ -95,6 +33,7 @@ const Overlay = styled(motion.div)`
   height: 100%;
   background-color: rgba(0, 0, 0, 0.5);
   opacity: 0;
+  z-index: 1;
 `;
 
 const BigMovie = styled(motion.div)`
@@ -107,6 +46,7 @@ const BigMovie = styled(motion.div)`
   border-radius: 15px;
   overflow: hidden;
   background-color: ${(props) => props.theme.black.lighter};
+  z-index: 1;
 `;
 
 const BigCover = styled.div`
@@ -131,98 +71,63 @@ const BigOverview = styled.p`
   color: ${(props) => props.theme.white.lighter};
 `;
 
-const rowVariants = {
-  hidden: {
-    x: window.outerWidth + 5,
-  },
-  visible: {
-    x: 0,
-  },
-  exit: {
-    x: -window.outerWidth - 5,
-  },
-};
-
-const boxVariants = {
-  normal: {
-    scale: 1,
-  },
-  hover: {
-    scale: 1.3,
-    y: -80,
-    transition: {
-      delay: 0.3,
-      duaration: 0.1,
-      type: "tween",
-    },
-  },
-};
-
-const infoVariants = {
-  hover: {
-    opacity: 1,
-    transition: {
-      delay: 0.5,
-      duaration: 0.1,
-      type: "tween",
-    },
-  },
-};
-
-const offset = 6;
-
 function Latest() {
   const history = useNavigate();
-  const bigTvMatch = useMatch("/latest/:tvId");
+  const onOverlayClick = () => history("/latest");
+  const overviewMatch = useMatch("/latest/:channelId");
   const { scrollY } = useViewportScroll();
-  const { data, isLoading } = useQuery<IGetTVResult>(
-    ["movies", "nowPlaying"],
+  // const [collectDB, setCollectDB] = useState<any>(null);
+
+  /**
+   * TV 관련 API 불러온다
+   */
+  const { data, isLoading } = useQuery<IGetMoviesResult>(
+    ["tv", "airing_today"],
     getTv_airing_today
   );
-  //   console.log(data, isLoading);
-  const [index, setIndex] = useState(0);
-  const [leaving, setLeaving] = useState(false);
+  const { data: tvPopularData, isLoading: tvPopularLoading } =
+    useQuery<IGetMoviesResult>(["tv", "popular"], getTv_popular);
 
-  const incraseIndex = () => {
-    if (data) {
-      if (leaving) return;
-      toggleLeaving();
-      const totalMovies = data.results.length - 1;
-      const maxIndex = Math.floor(totalMovies / offset) - 1;
-      setIndex((prev) => (prev === maxIndex ? 0 : prev + 1));
-    }
-  };
+  const { data: moviePopularData, isLoading: moviePopularLoading } =
+    useQuery<IGetMoviesResult>(["movie", "popular"], getMovie_popualr);
 
-  const toggleLeaving = () => setLeaving((prev) => !prev);
-  const onBoxClicked = (tvId: number) => {
-    history(`/latest/${tvId}`);
-  };
-  const onOverlayClick = () => history("/latest");
+  const { data: movieUpcomingData, isLoading: movieUpcomingLoading } =
+    useQuery<IGetMoviesResult>(["movie", "upcoming"], getMovie_upcoming);
 
-  const clickedTv =
-    bigTvMatch?.params.tvId &&
-    data?.results.find((tv) => String(tv.id) === bigTvMatch.params.tvId);
+  const collectDB: any = [
+    data,
+    tvPopularData,
+    moviePopularData,
+    movieUpcomingData,
+  ];
+
+  /**
+   * Params에서 channelId로 collectDB데이타 배열에서 같은 id를 가진 첫째 값을 불러온다
+   */
+  const clickedOverview =
+    overviewMatch?.params.channelId &&
+    collectDB
+      ?.map((data: any) =>
+        data?.results.filter(
+          (channel: any) =>
+            String(channel.id) === overviewMatch.params.channelId
+        )
+      )
+      .find((find: any) => find[0])[0];
 
   return (
     <Wrapper>
-      {isLoading ? (
+      {isLoading && tvPopularLoading && moviePopularLoading ? (
         <Loader>Loading...</Loader>
       ) : (
         <>
-          {/* <Banner
-            onClick={incraseIndex}
-            bgPhoto={makeImagePath(
-              data?.results[0].backdrop_path ||
-                `${data?.results[0].poster_path}`
-            )}
-          >
-            <Title>{data?.results[0].name}</Title>
-            <Overview>{data?.results[0].overview}</Overview>
-          </Banner> */}
-
-          <Slider data={data} />
+          <div style={{ height: "6vh" }}></div>
+          <Slider data={data} value={"New Episode"} />
+          <Slider data={tvPopularData} value={"Popular TV Shows"} />
+          <Slider data={moviePopularData} value={"Popular Movies"} />
+          <Slider data={movieUpcomingData} value={"Upcoming Movies"} />
           <AnimatePresence>
-            {bigTvMatch ? (
+            {overviewMatch ? (
               <>
                 <Overlay
                   onClick={onOverlayClick}
@@ -231,20 +136,23 @@ function Latest() {
                 />
                 <BigMovie
                   style={{ top: scrollY.get() + 100 }}
-                  layoutId={bigTvMatch.params.tvId}
+                  layoutId={overviewMatch.params.channelId}
                 >
-                  {clickedTv && (
+                  {clickedOverview && (
                     <>
                       <BigCover
                         style={{
                           backgroundImage: `linear-gradient(to top, black, transparent), url(${makeImagePath(
-                            clickedTv.backdrop_path,
+                            clickedOverview.backdrop_path ||
+                              clickedOverview.poster_path,
                             "w500"
                           )})`,
                         }}
                       />
-                      <BigTitle>{clickedTv.name}</BigTitle>
-                      <BigOverview>{clickedTv.overview}</BigOverview>
+                      <BigTitle>
+                        {clickedOverview.name || clickedOverview.title}
+                      </BigTitle>
+                      <BigOverview>{clickedOverview.overview}</BigOverview>
                     </>
                   )}
                 </BigMovie>
