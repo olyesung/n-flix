@@ -11,6 +11,8 @@ interface IMovie {
   title?: string;
   name?: string;
   overview: string;
+  vote_average?: number;
+  release_date?: string;
 }
 
 export interface IGetMoviesResult {
@@ -46,7 +48,7 @@ export interface IGetTVResult {
   total_results: number;
 }
 
-export function getMovies() {
+export function getMovie_nowplaying() {
   return fetch(`${BASE_PATH}/movie/now_playing?api_key=${API_KEY}`).then(
     (response) => response.json()
   );
@@ -58,6 +60,18 @@ export function getMovie_popualr() {
 }
 export function getMovie_upcoming() {
   return fetch(`${BASE_PATH}/movie/upcoming?api_key=${API_KEY}`).then(
+    (response) => response.json()
+  );
+}
+
+export function getMovie_toprated() {
+  return fetch(`${BASE_PATH}/movie/top_rated?api_key=${API_KEY}`).then(
+    (response) => response.json()
+  );
+}
+
+export function getMovie_latest() {
+  return fetch(`${BASE_PATH}/movie/latest?api_key=${API_KEY}`).then(
     (response) => response.json()
   );
 }

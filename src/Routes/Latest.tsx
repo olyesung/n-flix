@@ -2,7 +2,7 @@ import { useQuery } from "react-query";
 import styled from "styled-components";
 import { motion, AnimatePresence, useViewportScroll } from "framer-motion";
 import {
-  getMovies,
+  getMovie_nowplaying,
   getMovie_popualr,
   getMovie_upcoming,
   getTv_airing_today,
@@ -36,7 +36,7 @@ const Overlay = styled(motion.div)`
   z-index: 1;
 `;
 
-const BigMovie = styled(motion.div)`
+const Preview_box = styled(motion.div)`
   position: absolute;
   width: 40vw;
   height: 80vh;
@@ -49,14 +49,14 @@ const BigMovie = styled(motion.div)`
   z-index: 1;
 `;
 
-const BigCover = styled.div`
+const Preview_Image = styled.div`
   width: 100%;
   background-size: cover;
   background-position: center center;
   height: 400px;
 `;
 
-const BigTitle = styled.h3`
+const Preview_title = styled.h3`
   color: ${(props) => props.theme.white.lighter};
   padding: 20px;
   font-size: 46px;
@@ -64,7 +64,7 @@ const BigTitle = styled.h3`
   top: -80px;
 `;
 
-const BigOverview = styled.p`
+const Preview_detail = styled.p`
   padding: 20px;
   position: relative;
   top: -80px;
@@ -81,7 +81,7 @@ function Latest() {
   /**
    * TV 관련 API 불러온다
    */
-  const { data, isLoading } = useQuery<IGetMoviesResult>(
+  const { data: tvAiringTodayData, isLoading } = useQuery<IGetMoviesResult>(
     ["tv", "airing_today"],
     getTv_airing_today
   );
@@ -95,7 +95,7 @@ function Latest() {
     useQuery<IGetMoviesResult>(["movie", "upcoming"], getMovie_upcoming);
 
   const collectDB: any = [
-    data,
+    tvAiringTodayData,
     tvPopularData,
     moviePopularData,
     movieUpcomingData,
@@ -117,15 +117,34 @@ function Latest() {
 
   return (
     <Wrapper>
-      {isLoading && tvPopularLoading && moviePopularLoading ? (
+      {isLoading &&
+      tvPopularLoading &&
+      moviePopularLoading &&
+      movieUpcomingLoading ? (
         <Loader>Loading...</Loader>
       ) : (
         <>
           <div style={{ height: "6vh" }}></div>
-          <Slider data={data} value={"New Episode"} />
-          <Slider data={tvPopularData} value={"Popular TV Shows"} />
-          <Slider data={moviePopularData} value={"Popular Movies"} />
-          <Slider data={movieUpcomingData} value={"Upcoming Movies"} />
+          <Slider
+            data={tvAiringTodayData}
+            value={"New Episode"}
+            path={"latest"}
+          />
+          <Slider
+            data={tvPopularData}
+            value={"Popular TV Shows"}
+            path={"latest"}
+          />
+          <Slider
+            data={moviePopularData}
+            value={"Popular Movies"}
+            path={"latest"}
+          />
+          <Slider
+            data={movieUpcomingData}
+            value={"Upcoming Movies"}
+            path={"latest"}
+          />
           <AnimatePresence>
             {overviewMatch ? (
               <>
@@ -134,13 +153,13 @@ function Latest() {
                   exit={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                 />
-                <BigMovie
+                <Preview_box
                   style={{ top: scrollY.get() + 100 }}
                   layoutId={overviewMatch.params.channelId}
                 >
                   {clickedOverview && (
                     <>
-                      <BigCover
+                      <Preview_Image
                         style={{
                           backgroundImage: `linear-gradient(to top, black, transparent), url(${makeImagePath(
                             clickedOverview.backdrop_path ||
@@ -149,13 +168,15 @@ function Latest() {
                           )})`,
                         }}
                       />
-                      <BigTitle>
+                      <Preview_title>
                         {clickedOverview.name || clickedOverview.title}
-                      </BigTitle>
-                      <BigOverview>{clickedOverview.overview}</BigOverview>
+                      </Preview_title>
+                      <Preview_detail>
+                        {clickedOverview.overview}
+                      </Preview_detail>
                     </>
                   )}
-                </BigMovie>
+                </Preview_box>
               </>
             ) : null}
           </AnimatePresence>

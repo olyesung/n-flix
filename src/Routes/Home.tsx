@@ -1,7 +1,7 @@
 import { useQuery } from "react-query";
 import styled from "styled-components";
 import { motion, AnimatePresence, useViewportScroll } from "framer-motion";
-import { getMovies, IGetMoviesResult } from "../api";
+import { getMovie_nowplaying, IGetMoviesResult } from "../api";
 import { makeImagePath } from "../utils";
 import { useState } from "react";
 import { useNavigate, useMatch, Navigate, Outlet } from "react-router-dom";
@@ -170,7 +170,7 @@ function Home() {
   const { scrollY } = useViewportScroll();
   const { data, isLoading } = useQuery<IGetMoviesResult>(
     ["movies", "nowPlaying"],
-    getMovies
+    getMovie_nowplaying
   );
   const [index, setIndex] = useState(0);
   const [leaving, setLeaving] = useState(false);
@@ -244,7 +244,7 @@ function Home() {
               </Row>
             </AnimatePresence>
           </Slider>
-          <AnimatePresence>
+          {/* <AnimatePresence>
             {bigMovieMatch ? (
               <>
                 <Overlay
@@ -273,7 +273,7 @@ function Home() {
                 </BigMovie>
               </>
             ) : null}
-          </AnimatePresence>
+          </AnimatePresence> */}
         </>
       )}
       <Outlet />

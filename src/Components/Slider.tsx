@@ -125,7 +125,7 @@ const NextVariants = {
 
 const offset = 6;
 
-export default function Slider({ data, value }: any) {
+export default function Slider({ data, value, path }: any) {
   const history = useNavigate();
   const [index, setIndex] = useState(0);
   const [leaving, setLeaving] = useState(false);
@@ -144,7 +144,7 @@ export default function Slider({ data, value }: any) {
   const toggleLeaving = () => setLeaving((prev) => !prev);
 
   const onBoxClicked = (channelId: number) => {
-    history(`/latest/${channelId}`);
+    history(`/${path}/${channelId}`);
   };
 
   return (

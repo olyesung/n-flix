@@ -1,5 +1,5 @@
 import { useQuery } from "react-query";
-import { getTv_popular, IGetTVResult } from "../api";
+import { getTv_popular, IGetMoviesResult, IGetTVResult } from "../api";
 import styled from "styled-components";
 import { motion, AnimatePresence, useViewportScroll } from "framer-motion";
 import { makeImagePath } from "../utils";
@@ -168,7 +168,7 @@ function Tv() {
   const history = useNavigate();
   const bigTvMatch = useMatch("/tv/:tvId");
   const { scrollY } = useViewportScroll();
-  const { data, isLoading } = useQuery<IGetTVResult>(
+  const { data, isLoading } = useQuery<IGetMoviesResult>(
     ["tv", "popular"],
     getTv_popular
   );
