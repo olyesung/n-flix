@@ -5,6 +5,7 @@ import { getMovie_nowplaying, IGetMoviesResult } from "../api";
 import { makeImagePath } from "../utils";
 import { useState } from "react";
 import { useNavigate, useMatch, Navigate, Outlet } from "react-router-dom";
+import Slider from "../Components/Slider";
 
 const Wrapper = styled.div`
   background: black;
@@ -39,10 +40,10 @@ const Overview = styled.p`
   width: 50%;
 `;
 
-const Slider = styled.div`
-  position: relative;
-  top: -100px;
-`;
+// const Slider = styled.div`
+//   position: relative;
+//   top: -100px;
+// `;
 
 const Row = styled(motion.div)`
   display: grid;
@@ -164,118 +165,133 @@ const infoVariants = {
 
 const offset = 6;
 
+const Preview_box = styled(motion.div)`
+  position: absolute;
+  width: 40vw;
+  height: 80vh;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  border-radius: 15px;
+  overflow: hidden;
+  background-color: ${(props) => props.theme.black.lighter};
+  z-index: 1;
+`;
+
+const Preview_Image = styled.div`
+  width: 100%;
+  background-size: cover;
+  background-position: center center;
+  height: 400px;
+`;
+
+const Preview_title = styled.h3`
+  color: ${(props) => props.theme.white.lighter};
+  padding: 20px;
+  font-size: 46px;
+  position: relative;
+  top: -80px;
+`;
+
+const Preview_detail = styled.p`
+  padding: 20px;
+  position: relative;
+  top: -80px;
+  color: ${(props) => props.theme.white.lighter};
+`;
+
 function Home() {
-  const history = useNavigate();
-  const bigMovieMatch = useMatch("movies/:movieId");
-  const { scrollY } = useViewportScroll();
-  const { data, isLoading } = useQuery<IGetMoviesResult>(
-    ["movies", "nowPlaying"],
-    getMovie_nowplaying
-  );
-  const [index, setIndex] = useState(0);
-  const [leaving, setLeaving] = useState(false);
+  // const history = useNavigate();
+  // const overviewMatch = useMatch("/browse/:channelId");
+  // const { scrollY } = useViewportScroll();
+  // const { data, isLoading } = useQuery<IGetMoviesResult>(
+  //   ["browse", "nowPlaying"],
+  //   getMovie_nowplaying
+  // );
+  // const [index, setIndex] = useState(0);
+  // const [leaving, setLeaving] = useState(false);
+  const isLoading = "hi";
+  // const incraseIndex = () => {
+  //   if (data) {
+  //     if (leaving) return;
+  //     toggleLeaving();
+  //     const totalMovies = data.results.length - 1;
+  //     const maxIndex = Math.floor(totalMovies / offset) - 1;
+  //     setIndex((prev) => (prev === maxIndex ? 0 : prev + 1));
+  //   }
+  // };
 
-  const incraseIndex = () => {
-    if (data) {
-      if (leaving) return;
-      toggleLeaving();
-      const totalMovies = data.results.length - 1;
-      const maxIndex = Math.floor(totalMovies / offset) - 1;
-      setIndex((prev) => (prev === maxIndex ? 0 : prev + 1));
-    }
-  };
+  // const toggleLeaving = () => setLeaving((prev) => !prev);
+  // const onBoxClicked = (movieId: number) => {
+  //   history(`/${movieId}`);
+  // };
+  // const onOverlayClick = () => history("/");
 
-  const toggleLeaving = () => setLeaving((prev) => !prev);
-  const onBoxClicked = (movieId: number) => {
-    history(`/${movieId}`);
-  };
-  const onOverlayClick = () => history("/");
+  // const collectDB: any = [data];
 
-  const clickedMovie =
-    bigMovieMatch?.params.movieId &&
-    data?.results.find(
-      (movie) => String(movie.id) === bigMovieMatch.params.movieId
-    );
+  // const clickedOverview =
+  //   overviewMatch?.params.channelId &&
+  //   collectDB
+  //     ?.map((data: any) =>
+  //       data?.results.filter(
+  //         (channel: any) =>
+  //           String(channel.id) === overviewMatch.params.channelId
+  //       )
+  //     )
+  //     .find((find: any) => find[0])[0];
 
   // console.log(clickedMovie);
 
   return (
     <Wrapper>
-      {isLoading ? (
-        <Loader>Loading...</Loader>
-      ) : (
-        <>
-          <Banner
-            onClick={incraseIndex}
-            bgPhoto={makeImagePath(data?.results[0].backdrop_path || "")}
-          >
-            <Title>{data?.results[0].title}</Title>
-            <Overview>{data?.results[0].overview}</Overview>
-          </Banner>
-          <Slider>
-            <AnimatePresence initial={false} onExitComplete={toggleLeaving}>
-              <Row
-                variants={rowVariants}
-                initial="hidden"
-                animate="visible"
-                exit="exit"
-                transition={{ type: "tween", duration: 1 }}
-                key={index}
-              >
-                {data?.results
-                  .slice(1)
-                  .slice(offset * index, offset * index + offset)
-                  .map((movie) => (
-                    <Box
-                      layoutId={movie.id + ""}
-                      key={movie.id}
-                      whileHover="hover"
-                      initial="normal"
-                      variants={boxVariants}
-                      onClick={() => onBoxClicked(movie.id)}
-                      transition={{ type: "tween" }}
-                      bgphoto={makeImagePath(movie.backdrop_path, "w500")}
-                    >
-                      <Info variants={infoVariants}>
-                        <h4>{movie.title}</h4>
-                      </Info>
-                    </Box>
-                  ))}
-              </Row>
-            </AnimatePresence>
-          </Slider>
-          {/* <AnimatePresence>
-            {bigMovieMatch ? (
-              <>
-                <Overlay
-                  onClick={onOverlayClick}
-                  exit={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                />
-                <BigMovie
-                  style={{ top: scrollY.get() + 100 }}
-                  layoutId={bigMovieMatch.params.movieId}
-                >
-                  {clickedMovie && (
-                    <>
-                      <BigCover
-                        style={{
-                          backgroundImage: `linear-gradient(to top, black, transparent), url(${makeImagePath(
-                            clickedMovie.backdrop_path,
-                            "w500"
-                          )})`,
-                        }}
-                      />
-                      <BigTitle>{clickedMovie.title}</BigTitle>
-                      <BigOverview>{clickedMovie.overview}</BigOverview>
-                    </>
-                  )}
-                </BigMovie>
-              </>
-            ) : null}
-          </AnimatePresence> */}
-        </>
-      )}
+      {
+        isLoading ? <Loader>Loading...</Loader> : null
+        // <>
+        //   <Banner
+        //     onClick={incraseIndex}
+        //     bgPhoto={makeImagePath(data?.results[0].backdrop_path || "")}
+        //   >
+        //     <Title>{data?.results[0].title}</Title>
+        //     <Overview>{data?.results[0].overview}</Overview>
+        //   </Banner>
+        //   {/* <Slider data={data} value={"New Episode"} path={"browse"} /> */}
+        //   <AnimatePresence>
+        //     {overviewMatch ? (
+        //       <>
+        //         <Overlay
+        //           onClick={onOverlayClick}
+        //           exit={{ opacity: 0 }}
+        //           animate={{ opacity: 1 }}
+        //         />
+        //         <Preview_box
+        //           style={{ top: scrollY.get() + 100 }}
+        //           layoutId={overviewMatch.params.channelId}
+        //         >
+        //           {clickedOverview && (
+        //             <>
+        //               <Preview_Image
+        //                 style={{
+        //                   backgroundImage: `linear-gradient(to top, black, transparent), url(${makeImagePath(
+        //                     clickedOverview.backdrop_path ||
+        //                       clickedOverview.poster_path,
+        //                     "w500"
+        //                   )})`,
+        //                 }}
+        //               />
+        //               <Preview_title>
+        //                 {clickedOverview.name || clickedOverview.title}
+        //               </Preview_title>
+        //               <Preview_detail>
+        //                 {clickedOverview.overview}
+        //               </Preview_detail>
+        //             </>
+        //           )}
+        //         </Preview_box>
+        //       </>
+        //     ) : null}
+        //   </AnimatePresence>
+        // </>
+      }
       <Outlet />
     </Wrapper>
   );
