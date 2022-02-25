@@ -1,4 +1,3 @@
-import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Header from "./Components/Header";
 import Home from "./Routes/Home";
@@ -20,6 +19,7 @@ import {
 import { useQuery } from "react-query";
 
 function App() {
+  // Movie
   const { data: moviePopularData, isLoading: moviePopularLoading } =
     useQuery<IGetMoviesResult>(["movies", "popular"], getMovie_popualr);
 
@@ -46,9 +46,27 @@ function App() {
     <Router>
       <Header />
       <Routes>
-        <Route path="/*" element={<Home />}></Route>
         <Route
-          path="/tv/*"
+          path="/*"
+          element={
+            <Home
+              data={{
+                tvPopularData,
+                moviePopularData,
+                tvTopRatedData,
+                movieTopRatedData,
+              }}
+              isLoading={{
+                tvPopularLoading,
+                moviePopularLoading,
+                tvTopRatedLoading,
+                movieTopRatedLoading,
+              }}
+            />
+          }
+        ></Route>
+        <Route
+          path="/tvshow/*"
           element={
             <Tv
               data={{
@@ -98,7 +116,7 @@ function App() {
             />
           }
         ></Route>
-        <Route path="/search" element={<Search />}></Route>
+        <Route path="/search/*" element={<Search />}></Route>
       </Routes>
       <Footer />
     </Router>

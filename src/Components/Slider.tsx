@@ -1,10 +1,11 @@
 import styled from "styled-components";
-import { motion, AnimatePresence, useViewportScroll } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { makeImagePath } from "../utils";
 import { useState } from "react";
 import { useMatch, useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronRight } from "@fortawesome/free-solid-svg-icons";
+import Overview from "./Overview";
 
 const Wrapper = styled.div`
   margin: 5vh 3vw 0 3vw;
@@ -35,7 +36,7 @@ const Row = styled(motion.div)`
   margin-top: 20px;
 `;
 
-const Box = styled(motion.div)<{ bgphoto: string }>`
+export const Box = styled(motion.div)<{ bgphoto: string }>`
   background-color: white;
   background-image: url(${(props) => props.bgphoto});
   background-size: cover;
@@ -55,7 +56,7 @@ const Box = styled(motion.div)<{ bgphoto: string }>`
   }
 `;
 
-const Info = styled(motion.div)`
+export const Info = styled(motion.div)`
   padding: 10px;
   background-color: ${(props) => props.theme.black.lighter};
   opacity: 0;
@@ -92,7 +93,7 @@ const rowVariants = {
   },
 };
 
-const boxVariants = {
+export const boxVariants = {
   normal: {
     scale: 1,
   },
@@ -106,7 +107,7 @@ const boxVariants = {
   },
 };
 
-const infoVariants = {
+export const infoVariants = {
   hover: {
     opacity: 1,
     transition: {
@@ -125,11 +126,16 @@ const NextVariants = {
 
 const offset = 6;
 
-export default function Slider({ data, value, path }: any) {
+export default function Slider({ data, value, path, channel }: any) {
   const history = useNavigate();
   const [index, setIndex] = useState(0);
   const [leaving, setLeaving] = useState(false);
+  const overviewMatch = useMatch(`/${path}/${channel}/:channelId`);
 
+  /**
+   * 각 Row template에서는 최초 offset값(=6)을 불러오고
+   * HandleNext 버튼을 클릭하여 6개 간격마다 다음 data들을 볼 수 있다
+   */
   const incraseIndex = () => {
     if (data) {
       if (leaving) return;
@@ -137,14 +143,13 @@ export default function Slider({ data, value, path }: any) {
       const totalMovies = data.results.length - 1;
       const maxIndex = Math.floor(totalMovies / offset) - 1;
       setIndex((prev) => (prev === maxIndex ? 0 : prev + 1));
-      console.log(totalMovies, maxIndex);
     }
   };
 
   const toggleLeaving = () => setLeaving((prev) => !prev);
 
   const onBoxClicked = (channelId: number) => {
-    history(`/${path}/${channelId}`);
+    history(`/${path}/${channel}/${channelId}`);
   };
 
   return (
@@ -198,6 +203,11 @@ export default function Slider({ data, value, path }: any) {
               </Row>
             </AnimatePresence>
           </Slider_box>
+          <AnimatePresence>
+            {overviewMatch ? (
+              <Overview path={path} overviewMatch={overviewMatch} />
+            ) : null}
+          </AnimatePresence>
         </>
       )}
     </Wrapper>

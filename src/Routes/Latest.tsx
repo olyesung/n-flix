@@ -1,34 +1,12 @@
-import styled from "styled-components";
-import { AnimatePresence } from "framer-motion";
-import { useMatch } from "react-router-dom";
 import Slider from "../Components/Slider";
-import Overview from "../Components/Overview";
-
-const Wrapper = styled.div`
-  background-color: black;
-`;
-
-const Loader = styled.div`
-  height: 20vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-`;
+import { Wrapper } from "../Components/Style";
+import Loader from "../Components/Loader";
 
 function Latest({ data, isLoading }: any) {
-  const overviewMatch = useMatch("/latest/:channelId");
-
-  const collectDB: any = [
-    data.tvAiringTodayData,
-    data.tvPopularData,
-    data.moviePopularData,
-    data.movieUpcomingData,
-  ];
-
   return (
     <Wrapper>
       {isLoading.tvPopularLoading ? (
-        <Loader>Loading...</Loader>
+        <Loader />
       ) : (
         <>
           <div style={{ height: "6vh" }}></div>
@@ -36,31 +14,26 @@ function Latest({ data, isLoading }: any) {
             data={data.tvAiringTodayData}
             value={"New Episode"}
             path={"latest"}
+            channel={"tv"}
           />
           <Slider
             data={data.tvPopularData}
             value={"Popular TV Shows"}
             path={"latest"}
+            channel={"tv"}
           />
           <Slider
             data={data.moviePopularData}
             value={"Popular Movies"}
             path={"latest"}
+            channel={"movie"}
           />
           <Slider
             data={data.movieUpcomingData}
             value={"Upcoming Movies"}
             path={"latest"}
+            channel={"movie"}
           />
-          <AnimatePresence>
-            {overviewMatch ? (
-              <Overview
-                path={"latest"}
-                overviewMatch={overviewMatch}
-                collectDB={collectDB}
-              />
-            ) : null}
-          </AnimatePresence>
         </>
       )}
     </Wrapper>

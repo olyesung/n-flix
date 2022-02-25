@@ -1,5 +1,5 @@
-const API_KEY = process.env.REACT_APP_API_KEY;
-const BASE_PATH = "https://api.themoviedb.org/3";
+export const API_KEY = process.env.REACT_APP_API_KEY;
+export const BASE_PATH = "https://api.themoviedb.org/3";
 
 interface IMovie {
   id: number;
@@ -10,6 +10,7 @@ interface IMovie {
   overview: string;
   vote_average?: number;
   release_date?: string;
+  media_type?: string;
 }
 
 export interface IGetMoviesResult {
@@ -21,6 +22,17 @@ export interface IGetMoviesResult {
   results: IMovie[];
   total_pages: number;
   total_results: number;
+  success?: boolean;
+  backdrop_path?: string;
+}
+
+export interface IGetMovieDetail {
+  poster_path: string;
+  backdrop_path?: string;
+  title?: string;
+  name?: string;
+  overview: string;
+  success?: boolean;
 }
 
 // Movie
@@ -31,7 +43,7 @@ export function getMovie_popualr() {
   );
 }
 
-export function getMovie_nowplaying() {
+export function getMovie_nowPlaying() {
   return fetch(`${BASE_PATH}/movie/now_playing?api_key=${API_KEY}`).then(
     (response) => response.json()
   );
@@ -39,12 +51,6 @@ export function getMovie_nowplaying() {
 
 export function getMovie_upcoming() {
   return fetch(`${BASE_PATH}/movie/upcoming?api_key=${API_KEY}`).then(
-    (response) => response.json()
-  );
-}
-
-export function getMovie_toprated() {
-  return fetch(`${BASE_PATH}/movie/top_rated?api_key=${API_KEY}`).then(
     (response) => response.json()
   );
 }

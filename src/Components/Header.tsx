@@ -120,12 +120,23 @@ interface IForm {
 function Header() {
   const [searchOpen, setSearchOpen] = useState(false);
   const homeMatch = useMatch("/");
-  const tvMatch = useMatch("/tv");
-  const movieMatch = useMatch("/movies");
-  const latestMatch = useMatch("/latest");
+  const browseMatch = useMatch("/browse/*");
+  const tvMatch = useMatch("/tvshow/*");
+  const movieMatch = useMatch("/movies/*");
+  const latestMatch = useMatch("/latest/*");
   const inputAnimation = useAnimation();
   const navAnimation = useAnimation();
   const { scrollY } = useViewportScroll();
+  const history = useNavigate();
+  const { register, handleSubmit } = useForm<IForm>();
+
+  const onValid = (data: IForm) => {
+    history(`/search?keyword=${data.keyword}`);
+  };
+
+  /**
+   * search아이콘 클릭 시,  search바 생성 또는 숨김 애니메이션
+   */
   const toggleSearch = () => {
     if (searchOpen) {
       inputAnimation.start({
@@ -136,6 +147,10 @@ function Header() {
     }
     setSearchOpen((prev) => !prev);
   };
+
+  /**
+   * 스크롤시 Nav바 고정시킨다
+   */
   useEffect(() => {
     scrollY.onChange(() => {
       if (scrollY.get() > 80) {
@@ -145,12 +160,6 @@ function Header() {
       }
     });
   }, [scrollY, navAnimation]);
-
-  const history = useNavigate();
-  const { register, handleSubmit } = useForm<IForm>();
-  const onValid = (data: IForm) => {
-    history(`/search?keyword=${data.keyword}`);
-  };
 
   return (
     <Nav variants={navVariants} animate={navAnimation} initial={"top"}>
@@ -168,10 +177,12 @@ function Header() {
         </Logo>
         <Items>
           <Item>
-            <Link to="/">Home {homeMatch && <Circle layoutId="circle" />}</Link>
+            <Link to="/">
+              Home {(homeMatch || browseMatch) && <Circle layoutId="circle" />}
+            </Link>
           </Item>
           <Item>
-            <Link to="/tv">
+            <Link to="/tvshow">
               TV Shows {tvMatch && <Circle layoutId="circle" />}
             </Link>
           </Item>

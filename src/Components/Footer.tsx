@@ -1,9 +1,4 @@
-import React from "react";
-import { Link, useMatch, useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import { motion, useAnimation, useViewportScroll } from "framer-motion";
-import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faFacebookF,
@@ -26,7 +21,7 @@ const Icons = styled.div`
   display: flex;
   align-items: center;
 `;
-//background-color: orange;
+
 const Grid_template = styled.div`
   display: grid;
   grid-template-columns: repeat(4, 1fr);

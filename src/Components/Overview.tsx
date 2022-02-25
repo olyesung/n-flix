@@ -2,8 +2,11 @@ import styled from "styled-components";
 import { motion, useViewportScroll } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { makeImagePath } from "../utils";
+import { API_KEY, BASE_PATH, IGetMovieDetail } from "../api";
+import { useQuery } from "react-query";
+import { useEffect, useState } from "react";
 
-const Overlay = styled(motion.div)`
+export const Overlay = styled(motion.div)`
   position: fixed;
   top: 0;
   width: 100%;
@@ -11,9 +14,10 @@ const Overlay = styled(motion.div)`
   background-color: rgba(0, 0, 0, 0.5);
   opacity: 0;
   z-index: 1;
+  margin-left: -3vw;
 `;
 
-const Preview_box = styled(motion.div)`
+export const Preview_box = styled(motion.div)`
   position: absolute;
   width: 40vw;
   height: 80vh;
@@ -26,14 +30,14 @@ const Preview_box = styled(motion.div)`
   z-index: 1;
 `;
 
-const Preview_Image = styled.div`
+export const Preview_Image = styled.div`
   width: 100%;
   background-size: cover;
   background-position: center center;
   height: 400px;
 `;
 
-const Preview_title = styled.h3`
+export const Preview_title = styled.h3`
   color: ${(props) => props.theme.white.lighter};
   padding: 20px;
   font-size: 46px;
@@ -41,31 +45,36 @@ const Preview_title = styled.h3`
   top: -80px;
 `;
 
-const Preview_detail = styled.p`
+export const Preview_detail = styled.p`
   padding: 20px;
   position: relative;
   top: -80px;
   color: ${(props) => props.theme.white.lighter};
 `;
 
-export default function Overview({ path, overviewMatch, collectDB }: any) {
+export default function Overview({ overviewMatch, path }: any) {
   const history = useNavigate();
-  const onOverlayClick = () => history(`/${path}`);
+  const onOverlayClick = () => history(-1);
   const { scrollY } = useViewportScroll();
+  const channel = overviewMatch.pathname.replace(`/${path}`, "");
+  const [detailData, setDetail] = useState<IGetMovieDetail | undefined>();
 
-  /**
-   * Params에서 channelId로 collectDB데이타 배열에서 같은 id를 가진 첫째 값을 불러온다
-   */
-  const clickedOverview =
-    overviewMatch?.params.channelId &&
-    collectDB
-      ?.map((data: any) =>
-        data?.results.filter(
-          (channel: any) =>
-            String(channel.id) === overviewMatch.params.channelId
-        )
-      )
-      .find((find: any) => find[0])[0];
+  function getDetail() {
+    return fetch(`${BASE_PATH}${channel}?api_key=${API_KEY}`).then((response) =>
+      response.json()
+    );
+  }
+
+  const { data } = useQuery<IGetMovieDetail>(["channel", "detail"], getDetail);
+
+  useEffect(() => {
+    console.log(data);
+  }, [onOverlayClick]);
+
+  // useEffect(() => {
+  //   setDetail(data);
+  //   console.log(data);
+  // }, [data]);
 
   return (
     <>
@@ -78,20 +87,18 @@ export default function Overview({ path, overviewMatch, collectDB }: any) {
         style={{ top: scrollY.get() + 100 }}
         layoutId={overviewMatch.params.channelId}
       >
-        {clickedOverview && (
+        {detailData && (
           <>
             <Preview_Image
               style={{
                 backgroundImage: `linear-gradient(to top, black, transparent), url(${makeImagePath(
-                  clickedOverview.backdrop_path || clickedOverview.poster_path,
+                  detailData.backdrop_path || detailData.poster_path,
                   "w500"
                 )})`,
               }}
             />
-            <Preview_title>
-              {clickedOverview.name || clickedOverview.title}
-            </Preview_title>
-            <Preview_detail>{clickedOverview.overview}</Preview_detail>
+            <Preview_title>{detailData.name || detailData.title}</Preview_title>
+            <Preview_detail>{detailData.overview}</Preview_detail>
           </>
         )}
       </Preview_box>
