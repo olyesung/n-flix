@@ -5,8 +5,10 @@ import { makeImagePath } from "../utils";
 import { API_KEY, BASE_PATH, IGetMovieDetail } from "../api";
 import { useQuery } from "react-query";
 import { useEffect, useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCircleXmark } from "@fortawesome/free-solid-svg-icons";
 
-export const Overlay = styled(motion.div)`
+const Overlay = styled(motion.div)`
   position: fixed;
   top: 0;
   width: 100%;
@@ -17,10 +19,9 @@ export const Overlay = styled(motion.div)`
   margin-left: -3vw;
 `;
 
-export const Preview_box = styled(motion.div)`
+const Preview_box = styled(motion.div)`
   position: absolute;
-  width: 40vw;
-  height: 80vh;
+  width: 800px;
   left: 0;
   right: 0;
   margin: 0 auto;
@@ -30,25 +31,63 @@ export const Preview_box = styled(motion.div)`
   z-index: 1;
 `;
 
-export const Preview_Image = styled.div`
+const Preview_Image = styled.div`
   width: 100%;
   background-size: cover;
   background-position: center center;
-  height: 400px;
+  height: 500px;
 `;
 
-export const Preview_title = styled.h3`
+const CloseButton = styled.div`
+  position: absolute;
+  right: 0;
+  color: ${(props) => props.theme.black.lighter};
+  background-color: white;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 15px;
+  cursor: pointer;
+`;
+
+const Preview_detail = styled.div`
+  padding: 20px;
+  position: relative;
+  top: -80px;
+  display: flex;
+`;
+
+const Genres = styled.div`
+  margin: 12px 40px;
+  width: 300px;
+  font-size: 14px;
+  & :first-child {
+    opacity: 0.7;
+  }
+  & > div {
+    margin: 13px 0;
+  }
+  & > div :first-child {
+    opacity: 0.7;
+  }
+`;
+
+const Title = styled.h3`
   color: ${(props) => props.theme.white.lighter};
-  padding: 20px;
   font-size: 46px;
-  position: relative;
   top: -80px;
+  position: relative;
+  padding: 0 20px;
 `;
 
-export const Preview_detail = styled.p`
-  padding: 20px;
-  position: relative;
-  top: -80px;
+const RelaseDate = styled.div`
+  padding: 20px 5px;
+`;
+
+const Preview_overview = styled.p`
   color: ${(props) => props.theme.white.lighter};
 `;
 
@@ -68,13 +107,12 @@ export default function Overview({ overviewMatch, path }: any) {
   const { data } = useQuery<IGetMovieDetail>(["channel", "detail"], getDetail);
 
   useEffect(() => {
-    console.log(data);
-  }, [onOverlayClick]);
+    setDetail(data);
+  }, [getDetail]);
 
-  // useEffect(() => {
-  //   setDetail(data);
-  //   console.log(data);
-  // }, [data]);
+  useEffect(() => {
+    setDetail(undefined);
+  }, []);
 
   return (
     <>
@@ -89,6 +127,13 @@ export default function Overview({ overviewMatch, path }: any) {
       >
         {detailData && (
           <>
+            <CloseButton onClick={onOverlayClick}>
+              <FontAwesomeIcon
+                icon={faCircleXmark}
+                fontSize={35}
+                style={{ margin: "10px" }}
+              />
+            </CloseButton>
             <Preview_Image
               style={{
                 backgroundImage: `linear-gradient(to top, black, transparent), url(${makeImagePath(
@@ -97,8 +142,30 @@ export default function Overview({ overviewMatch, path }: any) {
                 )})`,
               }}
             />
-            <Preview_title>{detailData.name || detailData.title}</Preview_title>
-            <Preview_detail>{detailData.overview}</Preview_detail>
+            <Title>{detailData.name || detailData.title}</Title>
+            <Preview_detail>
+              <div style={{ width: "100%" }}>
+                <RelaseDate>
+                  {detailData?.release_date?.split("-")[0] ||
+                    detailData?.first_air_date?.split("-")[0]}
+                </RelaseDate>
+                <Preview_overview>{detailData.overview}</Preview_overview>
+              </div>
+              <Genres>
+                <span>Genres:</span>
+                {detailData.genres.map((genre, i, arr) =>
+                  arr.length - 1 === i ? (
+                    <span> {genre.name} </span>
+                  ) : (
+                    <span> {genre.name}, </span>
+                  )
+                )}
+                <div>
+                  <span>Vote Average:</span>{" "}
+                  <span>{detailData.vote_average}</span>
+                </div>
+              </Genres>
+            </Preview_detail>
           </>
         )}
       </Preview_box>

@@ -26,7 +26,8 @@ const Grid_template = styled.div`
 function Search() {
   const history = useNavigate();
   const location = useLocation();
-  const overviewMatch = useMatch("search/movie/:channelId");
+  const channel = window.location.pathname.split("/")[2];
+  const overviewMatch = useMatch(`search/${channel}/:channelId`);
   const keyword = new URLSearchParams(location.search).get("keyword");
   const [copyKeyword, setKeyword] = useState<string | null>("");
 

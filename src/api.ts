@@ -26,6 +26,11 @@ export interface IGetMoviesResult {
   backdrop_path?: string;
 }
 
+interface Genre {
+  id: number;
+  name: string;
+}
+
 export interface IGetMovieDetail {
   poster_path: string;
   backdrop_path?: string;
@@ -33,6 +38,10 @@ export interface IGetMovieDetail {
   name?: string;
   overview: string;
   success?: boolean;
+  release_date?: string;
+  genres: Genre[];
+  vote_average?: number;
+  first_air_date?: string;
 }
 
 // Movie
