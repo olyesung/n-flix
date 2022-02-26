@@ -1,0 +1,10 @@
+{
+  "files": {
+    "main.js": "/n-flix/static/js/main.dc60e405.js",
+    "index.html": "/n-flix/index.html",
+    "main.dc60e405.js.map": "/n-flix/static/js/main.dc60e405.js.map"
+  },
+  "entrypoints": [
+    "static/js/main.dc60e405.js"
+  ]
+}
